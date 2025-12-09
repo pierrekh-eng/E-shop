@@ -27,12 +27,16 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $products = Product::create($request->all());
-        return [
-            'success'=>true,
-            'message'=>'category added successfully ',
-            'data'=>$products,
-        ];
+         $data = $request->validated();
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        Product::create($data);
+
+        return redirect()->route('products.index')->with('success', 'Product created successfully');
     }
 
     /**
@@ -40,6 +44,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        // return view('products.show', compact('product'));
         return [
             'success'=>true,
             'message'=>'one added',
@@ -52,12 +57,16 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->all());
-        return[
-            'success'=>true,
-            'message'=>'category updated successfully',
-            'data'=>$product,
-        ];
+        $data = $request->validated();
+
+        // Update image if uploaded
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
+
+        return redirect()->route('products.index')->with('success', 'Product updated successfully');
     }
 
     /**
